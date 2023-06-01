@@ -26,6 +26,14 @@ export const getTasks = (): Promise<Task[]> =>
     }, 200);
   });
 
+export const getTaskById = (id: number): Promise<Task> =>
+  new Promise((res) => {
+    setTimeout(() => {
+      const task = tasks.find((t) => t.id === id);
+      res(task);
+    });
+  });
+
 export const getTasksByUserId = (userId: number): Promise<Task[]> =>
   new Promise((res) => {
     setTimeout(() => {

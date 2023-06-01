@@ -1,6 +1,6 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LoginScene, TasksScene } from 'scenes';
+import { LoginScene, TasksScene, TaskEditScene } from 'scenes';
 import { switchRoutes } from './routes';
 
 export const RouterComponent: React.FunctionComponent = () => {
@@ -13,11 +13,7 @@ export const RouterComponent: React.FunctionComponent = () => {
         />
         <Route path={switchRoutes.login} element={<LoginScene />} />
         <Route path={switchRoutes.tasks} element={<TasksScene />} />
-        {/* <Route
-          path={switchRoutes.hotelCollection}
-          element={<HotelCollectionScene />}
-        />
-        <Route path={switchRoutes.hotelEdit} element={<HotelEditScene />} /> */}
+        <Route path={switchRoutes.taskEdit} element={<TaskEditScene />} />
       </Routes>
     </HashRouter>
   );

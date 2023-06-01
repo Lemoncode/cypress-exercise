@@ -14,6 +14,8 @@ import {
 import { mapTaskModelToTaskVMCollection } from './mappers';
 import { TaskNew, Task } from './viewmodels';
 import { SessionContext, Role } from 'core/session-context';
+import { useNavigate } from 'react-router-dom';
+import { linkRoutes } from 'core/router';
 
 const getAllTasks = (...setters) => {
   getTasks()
@@ -58,6 +60,7 @@ export const TaskContainer: React.FunctionComponent = () => {
   const {
     login: { id, role },
   } = useContext(SessionContext);
+  const navigate = useNavigate();
   const doGetAllsTasksByUserId = getAllsTasksByUserId(setTasks, setRefresh);
 
   useEffect(() => {
@@ -101,6 +104,10 @@ export const TaskContainer: React.FunctionComponent = () => {
         setRefresh(true);
       });
     }
+
+    if (actionType === 'update') {
+      navigate(linkRoutes.taskEdit(taskId.toString()));
+    }
   };
 
   return (
@@ -125,7 +132,7 @@ export const TaskContainer: React.FunctionComponent = () => {
         handleClose={() => {
           setIsSnackbarOpen(false);
         }}
-        message='Title and description are mandatory'
+        message="Title and description are mandatory"
         open={isSnackbarOpen}
       />
     </>
