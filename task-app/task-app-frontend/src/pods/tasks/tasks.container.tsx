@@ -4,7 +4,13 @@ import {
   TaskListComponent,
   TaskFilterComponent,
 } from './components';
-import { addTask, getTasksByUserId, getTasks } from './api/task.api';
+import { SnackbarComponent } from 'common/components';
+import {
+  addTask,
+  getTasksByUserId,
+  getTasks,
+  deleteTask,
+} from './api/task.api';
 import { mapTaskModelToTaskVMCollection } from './mappers';
 import { TaskNew, Task } from './viewmodels';
 import { SessionContext, Role } from 'core/session-context';
@@ -32,10 +38,23 @@ const getAllsTasksByUserId =
 
 const isAdmin = (role: Role) => role === 'admin';
 
+const isEmptyString = (value: string) => value && value === '';
+
+const isValidTaskNewValue = (value: string) => value && !isEmptyString(value);
+
+const isValidNewTask = (newTask: TaskNew) => {
+  return (
+    newTask &&
+    isValidTaskNewValue(newTask.description) &&
+    isValidTaskNewValue(newTask.title)
+  );
+};
+
 export const TaskContainer: React.FunctionComponent = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>();
   const [refresh, setRefresh] = useState(false);
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const {
     login: { id, role },
   } = useContext(SessionContext);
@@ -59,9 +78,13 @@ export const TaskContainer: React.FunctionComponent = () => {
 
   const onSaveTask = (taskNew: TaskNew) => {
     taskNew.userId = id;
-    addTask(taskNew).then(() => {
-      setRefresh(true);
-    });
+    if (isValidNewTask(taskNew)) {
+      addTask(taskNew).then(() => {
+        setRefresh(true);
+      });
+    } else {
+      setIsSnackbarOpen(true);
+    }
   };
 
   const onFilterTasks = (filterValue: string) => {
@@ -72,7 +95,13 @@ export const TaskContainer: React.FunctionComponent = () => {
   const handleActionTask = (
     taskId: number,
     actionType: 'update' | 'delete'
-  ) => {};
+  ) => {
+    if (actionType === 'delete') {
+      deleteTask(taskId).then(() => {
+        setRefresh(true);
+      });
+    }
+  };
 
   return (
     <>
@@ -91,6 +120,14 @@ export const TaskContainer: React.FunctionComponent = () => {
           />
         </>
       )}
+      <SnackbarComponent
+        severity="error"
+        handleClose={() => {
+          setIsSnackbarOpen(false);
+        }}
+        message='Title and description are mandatory'
+        open={isSnackbarOpen}
+      />
     </>
   );
 };

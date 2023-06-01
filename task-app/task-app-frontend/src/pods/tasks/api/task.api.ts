@@ -1,5 +1,6 @@
 import { Task } from './task.model';
-import { TaskNew } from '../viewmodels/task-new.viewmodel';
+import { TaskNew, Task as TaskViewmodel } from '../viewmodels';
+import { getUserById, getUserByName } from './user.api';
 
 let tasks: Task[] = [
   {
@@ -35,19 +36,45 @@ export const getTasksByUserId = (userId: number): Promise<Task[]> =>
 export const addTask = (taskNew: TaskNew): Promise<void> =>
   new Promise((resolve) => {
     setTimeout(() => {
-      const resolveUserName = tasks.find(
-        (t) => t.id === taskNew.userId
-      ).userName;
-      const task: Task = {
-        id: Date.now(),
-        description: taskNew.description,
-        userId: taskNew.userId,
-        title: taskNew.title,
-        userName: resolveUserName,
-      };
-      tasks = tasks.concat(task);
-      resolve();
+      getUserById(taskNew.userId).then((user) => {
+        const task: Task = {
+          id: Date.now(),
+          description: taskNew.description,
+          userId: taskNew.userId,
+          title: taskNew.title,
+          userName: user.name,
+        };
+        tasks = tasks.concat(task);
+        resolve();
+      });
     }, 200);
   });
 
-export const deleteTask = () => {};
+export const deleteTask = (taskId: number): Promise<void> =>
+  new Promise((resolve) => {
+    tasks = tasks.filter((t) => t.id !== taskId);
+    resolve();
+  });
+
+export const updateTask = (task: TaskViewmodel): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      getUserByName(task.userName).then((user) => {
+        const _task: Task = {
+          description: task.description,
+          id: task.id,
+          title: task.title,
+          userId: user.id,
+          userName: user.name,
+        };
+
+        tasks = tasks.map((t) => {
+          if (t.id === _task.id) {
+            return _task;
+          }
+          return t;
+        });
+        resolve();
+      });
+    }, 200);
+  });

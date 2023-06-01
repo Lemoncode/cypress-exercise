@@ -17,3 +17,19 @@ export const getUsers = (): Promise<User[]> =>
       res(users);
     }, 200);
   });
+
+export const getUserById = (id: number): Promise<User> =>
+  new Promise((res) =>
+    setTimeout(() => {
+      const [user] = users.filter((u) => u.id === id);
+      res(user);
+    }, 200)
+  );
+
+export const getUserByName = (name: string): Promise<User> =>
+  new Promise((res) =>
+    setTimeout(() => {
+      const [user] = users.filter((u) => u.name === name);
+      res(user);
+    }, 200)
+  );
