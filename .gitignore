@@ -6,7 +6,7 @@ test-report.*
 junit.xml
 *.log
 *.orig
-package-lock.json
 yarn.lock
 .awcache
 public
+.env
