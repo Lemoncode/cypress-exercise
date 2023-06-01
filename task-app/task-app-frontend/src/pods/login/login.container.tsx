@@ -19,7 +19,7 @@ export const LoginContainer: React.FunctionComponent<Props> = (props) => {
     const user = await api.login(login.name, login.password);
 
     if (user) {
-      updateLogin(login.name);
+      updateLogin({ id: user.id, username: user.name, role: user.role });
       navigate(linkRoutes.tasks);
     } else {
       // TODO: Show snackbar component

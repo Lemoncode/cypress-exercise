@@ -49,3 +49,5 @@ export const addTask = (taskNew: TaskNew): Promise<void> =>
       resolve();
     }, 200);
   });
+
+export const deleteTask = () => {};

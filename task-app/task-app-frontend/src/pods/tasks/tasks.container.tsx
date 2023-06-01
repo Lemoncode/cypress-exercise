@@ -1,38 +1,96 @@
-import React, { useState } from 'react';
-import { TaskFormComponent, TaskListComponent } from './components';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  TaskFormComponent,
+  TaskListComponent,
+  TaskFilterComponent,
+} from './components';
 import { addTask, getTasksByUserId, getTasks } from './api/task.api';
 import { mapTaskModelToTaskVMCollection } from './mappers';
-import { TaskNew } from './viewmodels/task-new.viewmodel';
+import { TaskNew, Task } from './viewmodels';
+import { SessionContext, Role } from 'core/session-context';
 
-// TODO: Retrieve userId from context on container
+const getAllTasks = (...setters) => {
+  getTasks()
+    .then(mapTaskModelToTaskVMCollection)
+    .then((tasks) => {
+      setters[0](tasks);
+      setters[1](tasks);
+    })
+    .catch((err) => console.log(err));
+};
+
+const getAllsTasksByUserId =
+  (...setters) =>
+  (userId: number) => {
+    getTasksByUserId(userId)
+      .then(mapTaskModelToTaskVMCollection)
+      .then((tasks) => {
+        setters[0](tasks);
+        setters[1](false);
+      });
+  };
+
+const isAdmin = (role: Role) => role === 'admin';
+
 export const TaskContainer: React.FunctionComponent = () => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>();
   const [refresh, setRefresh] = useState(false);
+  const {
+    login: { id, role },
+  } = useContext(SessionContext);
+  const doGetAllsTasksByUserId = getAllsTasksByUserId(setTasks, setRefresh);
 
-  React.useEffect(() => {
-    if (refresh || tasks.length === 0) {
-      getTasks()
-        .then(mapTaskModelToTaskVMCollection)
-        .then((tasks) => {
-          setTasks(tasks);
-          setRefresh(false);
-        })
-        .catch((err) => console.log(err));
+  useEffect(() => {
+    console.log('rendering');
+  });
+
+  useEffect(() => {
+    if (role === 'admin') {
+      getAllTasks(setTasks, setFilteredTasks);
     }
-  }, [refresh]);
+  }, [role]);
 
-  // TODO: Add a new card to cards
-  // TODO: Move to a side effect
+  useEffect(() => {
+    if (refresh || role === 'standard') {
+      doGetAllsTasksByUserId(id);
+    }
+  }, [refresh, role]);
+
   const onSaveTask = (taskNew: TaskNew) => {
+    taskNew.userId = id;
     addTask(taskNew).then(() => {
       setRefresh(true);
     });
   };
 
+  const onFilterTasks = (filterValue: string) => {
+    const result = tasks.filter((t) => t.userName.includes(filterValue));
+    setFilteredTasks(result);
+  };
+
+  const handleActionTask = (
+    taskId: number,
+    actionType: 'update' | 'delete'
+  ) => {};
+
   return (
     <>
-      <TaskFormComponent saveTask={onSaveTask} />
-      <TaskListComponent tasks={tasks} />
+      {isAdmin(role) ? (
+        <>
+          <TaskFilterComponent onFilter={onFilterTasks} />
+          <TaskListComponent isAdmin={true} tasks={filteredTasks} />
+        </>
+      ) : (
+        <>
+          <TaskFormComponent saveTask={onSaveTask} />
+          <TaskListComponent
+            isAdmin={false}
+            tasks={tasks}
+            onActionTask={handleActionTask}
+          />
+        </>
+      )}
     </>
   );
 };

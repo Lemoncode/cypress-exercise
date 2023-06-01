@@ -12,7 +12,7 @@ interface Props {
 
 export const AppLayout: React.FC<Props> = (props) => {
   const { children } = props;
-  const { login } = React.useContext(SessionContext);
+  const { login: { username } } = React.useContext(SessionContext);
   const navigate = useNavigate();
 
   return (
@@ -27,7 +27,7 @@ export const AppLayout: React.FC<Props> = (props) => {
             <AccountCircle />
           </IconButton>
           <Typography variant="h6" color="inherit">
-            {login}
+            {username}
           </Typography>
         </Toolbar>
       </AppBar>
