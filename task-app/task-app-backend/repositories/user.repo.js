@@ -19,6 +19,8 @@ const users = [
   },
 ];
 
+const _getUserByName = name => users.filter(u => u.name === name);
+
 module.exports = {
   getUserById(id) {
     const [user] = users.filter(u => u.id === id);
@@ -26,10 +28,10 @@ module.exports = {
   },
   getUserByName(name) {
     const [user] = users.filter(u => u.name === name);
-    return user;
+    return { id: user.id, name: user.name, role: user.role };
   },
   login(username, password) {
-    const user = this.getUserByName(username);
+    const [user] = _getUserByName(username);
     return user && user.password === password;
   },
   print() {

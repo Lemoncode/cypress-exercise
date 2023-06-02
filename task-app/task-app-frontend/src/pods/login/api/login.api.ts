@@ -4,47 +4,23 @@ export interface User {
   id: number;
   name: string;
   role: Role;
-  password: string;
 }
 
-const users: User[] = [
-  {
-    id: 1,
-    name: 'jai',
-    role: 'standard',
-    password: 'test',
-  },
-  {
-    id: 2,
-    name: 'lau',
-    role: 'standard',
-    password: 'test',
-  },
-  {
-    id: 99,
-    name: 'admin',
-    role: 'admin',
-    password: 'test',
-  },
-];
-
-const getUser = (username: string) => users.find((u) => u.name === username);
-
-const isValidLogin = async (
-  user: User,
-  username: string,
-  password: string
-): Promise<boolean> => {
-  return Promise.resolve(user.name === username && user.password === password);
-};
+const basURL = 'http://localhost:3000';
 
 export const login = async (
   username: string,
   password: string
-): Promise<Omit<User, 'password'> | null> => {
-  const user = getUser(username);
-  if (await isValidLogin(user, username, password)) {
-    return { id: user.id, name: user.name, role: user.role };
+): Promise<User | null> => {
+  const response = await fetch(`${basURL}/api/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  if (response.ok) {
+    const { user } = await response.json();
+    return user;
+  } else {
+    return null;
   }
-  return null;
 };

@@ -14,18 +14,30 @@ const port = 3000;
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   const ok = userRepo.login(username, password);
-  res.send({ ok });
+  let user;
+  if (ok) {
+    user = userRepo.getUserByName(username);
+  }
+  console.log(ok, user);
+  res.send({ ok, user });
 });
 
+// Get single task by task id
 app.get('/api/tasks/:userId/:id', (req, res) => {
   const { id } = req.params;
   const response = taskRepo.getTaskById(+id);
   res.send(response);
 });
 
+// Get User's tasks
 app.get('/api/tasks/:userId', (req, res) => {
   const { userId } = req.params;
   const tasks = taskRepo.getTasksByUserId(+userId);
+  res.send(tasks);
+});
+
+app.get('/api/tasks', (req, res) => {
+  const tasks = taskRepo.getTasks();
   res.send(tasks);
 });
 
@@ -34,8 +46,8 @@ app.post('/api/tasks', (req, res) => {
   const { title, description, userId } = req.body;
   const { name } = userRepo.getUserById(+userId);
   const task = { title, description, userId, userName: name };
-  const tasks = taskRepo.addTask(task);
-  res.send(tasks);
+  taskRepo.addTask(task);
+  res.send({ ok: true });
 });
 
 app.delete('/api/tasks/:id', (req, res) => {
