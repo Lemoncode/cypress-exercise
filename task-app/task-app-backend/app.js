@@ -17,9 +17,10 @@ app.post('/api/login', (req, res) => {
   res.send({ ok });
 });
 
-app.get('/api/tasks', (_, res) => {
-  const tasks = taskRepo.getTasks();
-  res.send(tasks);
+app.get('/api/tasks/:userId/:id', (req, res) => {
+  const { id } = req.params;
+  const response = taskRepo.getTaskById(+id);
+  res.send(response);
 });
 
 app.get('/api/tasks/:userId', (req, res) => {
